@@ -8,3 +8,4 @@ resources:
   - cert-manager.yaml
   - nginx-ingress.yaml
   - weave-gitops.yaml
+  - gluetun.yaml
