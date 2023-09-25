@@ -1,0 +1,81 @@
+﻿################################
+### Namespaces
+################################
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gluetun
+  labels:
+    app.kubernetes.io/part-of: gluetun
+
+---
+
+################################
+### Persistent Volume Claims
+################################
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gluetun-config
+  namespace: gluetun
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path # todo: figure out why usb-storage-class isn't working... 
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+
+################################
+### Deployments
+################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gluetun
+  namespace: gluetun
+  labels:
+    app.kubernetes.io/name: gluetun
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gluetun
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gluetun
+    spec:
+      containers:
+        - name: gluetun
+          image: ghcr.io/qdm12/gluetun
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              add: [ "NET_ADMIN" ]
+          envFrom:
+            - secretRef:
+                name: environment          
+          volumeMounts:
+            - name: gluetun-config
+              mountPath: /gluetun
+
+        # -- Test your connection --
+        # Shell into the sidecar and run: wget -qO- https://ipinfo.io
+        - name: gluetun-alpine
+          image: alpine
+          command: [ "sleep", "infinity" ]
+          
+      volumes:
+        - name: gluetun-config
+          persistentVolumeClaim:
+            claimName: gluetun-config

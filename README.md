@@ -1,6 +1,6 @@
 # Home Server
 
-## Pre-requisites
+## Prepare the node
 
 ### Set up USB Disk Storage
 ```
@@ -28,6 +28,7 @@ export GITHUB_TOKEN=<personal_access_token>
 flux bootstrap github --owner=$GITHUB_USER --repository=home-server --branch=main --path=./clusters/home-server --personal
 kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey
 flux create secret git secrets-repo-ssh --url=ssh://git@github.com/Strayfe/home-server-secrets --ssh-key-algorithm=ecdsa --ssh-ecdsa-curve=p521
+-- store this ssh key in github manually for now, will come up with an automation for this step or just reuse a constant
 ```
 
 ### (Optional) Install K9S
